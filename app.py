@@ -8,8 +8,10 @@ import json
 app = Flask(__name__)
 CORS(app)
 
-DB_FILE = "colegios.db"
-UPLOAD_FOLDER = "uploads"
+# === RUTAS ABSOLUTAS PARA RENDER / SERVIDOR ===
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_FILE = os.path.join(BASE_DIR, "colegios.db")
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
@@ -1057,32 +1059,13 @@ def listar_marcaciones(colegio):
     items = [dict(row) for row in c.fetchall()]
     conn.close()
     return jsonify({"items": items}), 200
-# =============== ASISTENCIA BIOMÉTRICA: RESUMEN FECHA A FECHA ===============
 
+
+# =============== ASISTENCIA BIOMÉTRICA: RESUMEN FECHA A FECHA ===============
 @app.route("/asistencia_biometrico/fecha_a_fecha/<colegio>", methods=["GET"])
 def biometrico_fecha_a_fecha(colegio):
     """
     Informe tipo 'Entradas/Salidas vs Fecha a Fecha'.
-
-    GET /asistencia_biometrico/fecha_a_fecha/<colegio>?desde=YYYY-MM-DD&hasta=YYYY-MM-DD
-
-    Respuesta:
-    {
-      "items": [
-        {
-          "usuario_nombre": "Pedro Paramo",
-          "email": "pedro@x.com",
-          "total_entradas": 10,
-          "total_salidas": 9,
-          "fechas": [
-            {"fecha": "2025-02-20", "entradas": 3, "salidas": 2},
-            {"fecha": "2025-02-21", "entradas": 4, "salidas": 3},
-            ...
-          ]
-        },
-        ...
-      ]
-    }
     """
     desde = request.args.get("desde")
     hasta = request.args.get("hasta")
@@ -1138,7 +1121,6 @@ def biometrico_fecha_a_fecha(colegio):
 
     items = list(usuarios.values())
     return jsonify({"items": items}), 200
-
 
 
 # =============== CURSOS / ESTUDIANTES / PROFESORES ===============
@@ -1436,15 +1418,12 @@ def eliminar_profesor(prof_id):
     conn.commit()
     conn.close()
     return jsonify({"mensaje": "profesor eliminado"}), 200
-# --- INICIALIZAR BD SIEMPRE QUE SE IMPORTE LA APP ---
+
+
+# --- INICIALIZAR BD AL IMPORTAR ---
 init_db()
 
 if __name__ == "__main__":
-    # Solo para modo local
-    app.run(host="0.0.0.0", port=5000, debug=True)
-
-
-
-# if __name__ == "__main__":
-#     init_db()
-#     app.run(host="0.0.0.0", port=5000, debug=True)
+    # Solo para modo local; Render usará gunicorn app:app
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
