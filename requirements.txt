@@ -2,3 +2,13 @@ flask
 flask-cors
 qrcode
 pillow
+Flask==3.0.3
+Werkzeug==3.0.3
+itsdangerous==2.2.0
+Jinja2==3.1.4
+click==8.1.7
+
+gunicorn==23.0.0
+
+Flask-Cors==4.0.1
+# + todas las demás librerías que ya usabas (sqlite3 no va aquí)
